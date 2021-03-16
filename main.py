@@ -65,6 +65,7 @@ for i in chunks_za_update:
         'create': artikli_za_insert,
         'update': i,
         'delete': []
+        
     }
 
     def BatchPostToWc():
