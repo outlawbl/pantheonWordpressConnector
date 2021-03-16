@@ -27,17 +27,22 @@ cur = db.cursor()
 select_nesinhronizovano = "SELECT * FROM ao_wms_artikal"
 update_sinhronizovano = "UPDATE ao_wms_artikal SET sinhronizovano = 'false' where erp_identifikator = '09140001'"
 
+select_pantheon_artikli = "SELECT * FROM _ARTKLI_WEB where acFieldSF = 'da' or acFieldSF = 'DA'" 
+
 def query_db(query, args=(), one=False):
   cur.execute(query, args)
   r = [dict((cur.description[i][0], value) \
             for i, value in enumerate(row)) for row in cur.fetchall()]
   return (r[0] if r else None) if one else r
 
-nesinhronizovani_artikli = query_db(select_nesinhronizovano)
-nesinhronizovani_artikli_json = json.dumps(nesinhronizovani_artikli)
+# nesinhronizovani_artikli = query_db(select_nesinhronizovano)
+# nesinhronizovani_artikli_json = json.dumps(nesinhronizovani_artikli)
 
-cur.execute(update_sinhronizovano)
-db.commit()
+cur.execute(select_pantheon_artikli)
+pantheon_artikli = query_db(select_pantheon_artikli)
 
-print(nesinhronizovani_artikli_json)
+# cur.execute(update_sinhronizovano)
+# db.commit()
+
+print(select_pantheon_artikli)
 print(cur.rowcount, "record(s) affected")

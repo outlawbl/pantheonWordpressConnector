@@ -5,92 +5,13 @@ import pyodbc as pyodbc
 import schedule
 import time
 from woocommerce import API
+from decimal import *
+import json
+from pantheonArtikli import pantheon_artikli, id_pantheon_artikala
+from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
+from test import razlika
 
-#################################################################################################################
-# SQL DATABASE CONNECT                                               #
-#################################################################################################################
-
-data_file = 'config.ini'
-config = ConfigParser()
-config.read(data_file)
-
-driver = config['db_config']['driver']
-server = config['db_config']['server']
-database = config['db_config']['database']
-username = config['db_config']['username']
-password = config['db_config']['password']
-
-db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password)
-cur = db.cursor()
-
-#################################################################################################################
-# SQL DATABASE QUERIES                                               #
-#################################################################################################################
-
-select_test_artikal = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'shop'"
-select_nesinhronizovano = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'false'"
-update_sinhronizovano = "UPDATE ao_wms_artikal SET sinhronizovano = 'true' where sinhronizovano = 'shop'"
-
-
-def query_db(query, args=(), one=False):
-    cur.execute(query, args)
-    r = [dict((cur.description[i][0], value) \
-            for i, value in enumerate(row)) for row in cur.fetchall()]
-    return (r[0] if r else None) if one else r
-
-
-#
-# nesinhronizovani_artikli = query_db(select_nesinhronizovano)
-# nesinhronizovani_artikli_json = json.dumps(nesinhronizovani_artikli)
-#
-# cur.execute(update_sinhronizovano)
-#
-# db.commit()
-#
-# print(nesinhronizovani_artikli_json)
-# print(cur.rowcount, "record(s) affected")
-
-cur.execute(select_test_artikal)
-test_artikli = query_db(select_test_artikal)
-
-# pprint.pprint(test_artikli)
-
-#################################################################################################################
-# Mijenjanje stringa - priprema za WC
-#################################################################################################################
-
-for artikal in test_artikli:
-    artikal['status'] = 'draft'
-    artikal['sku'] = artikal['erp_identifikator']
-    artikal['name'] = artikal['naziv_artikla']
-
-    del artikal['erp_identifikator']
-    del artikal['dodavanje_izmjena']
-    del artikal['naziv_artikla']
-    del artikal['sinhronizovano']
-    del artikal['vrijemeChg']
-    del artikal['vrijemeIns']
-    del artikal['erp_identifikator_novi']
-    del artikal['jedinica_mjere']
-
-# for artikal in test_artikli:
-
-#     artikal_images = []
-#     artikal_single_image = {}
-#     folder = artikal['sku']
-#     for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
-#         kljuc = 'src:'
-#         putanja_slike = f'D:\Documents\Alf-om\Alf-omwebshop\product_images\{folder}\{slika}'
-#         artikal_single_image[kljuc] = putanja_slike
-#         artikal_images.append(artikal_single_image)
-
-#     artikal['images'] = artikal_images
-
-pprint.pprint(test_artikli)
-
-#################################################################################################################
-# Postavljanje artikala na Woocommerce
-#################################################################################################################
+start_time = time.time()
 
 wcapi = API(
     url="https://shop.aporia.app",
@@ -101,28 +22,56 @@ wcapi = API(
     query_string_auth=True
 )
 
-
-def postToWc():
-    for artikal in test_artikli:
-        wcapi.post("products", artikal).json()
-
-postToWc()
-
 # ################################################################################################################
-# Stavljanje flega da je sinhronizovano
+# artikli koji imaju u pantheonu a nemaju na shopu, znaci treba ih dodati
 # ################################################################################################################
 
-# cur.execute(update_sinhronizovano)
-# db.commit()
-# print(cur.rowcount, "record(s) affected")
+id_za_insert = list(set(id_pantheon_artikala) - set(id_woocommerce_artikala))
+print(id_za_insert)
+print(len(id_za_insert))
 
-# ################################################################################################################
-# Schedule - nije zavrseno
-# ################################################################################################################
+artikli_za_insert = []
+for ident in id_za_insert:
+    for artikal in pantheon_artikli:
+        if artikal['sku'] == ident:
+            artikli_za_insert.append(artikal)
 
-# schedule.every(2).seconds.do(postToWc)
+print(artikli_za_insert)
+print('Insertovano je: ', len(artikli_za_insert), ' artikala.')
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+#################################################################################################################
+# Artikli koje treba update-ovati                                                                               #
+#################################################################################################################
+def chunks(lista, n):
+    for i in range(0, len(lista), n):
+        yield lista[i:i + n]
+chunks_za_update = list(chunks(razlika, 50))
 
+#################################################################################################################
+# Postavljanje artikala na Woocommerce                                                                          #
+#################################################################################################################
+
+# def postToWc():
+#     for artikal in artikli_za_insert:
+#         wcapi.post("products", artikal).json()
+
+# postToWc()
+
+#################################################################################################################
+# Batch update artikala na Woocommerce                                                                          #
+#################################################################################################################
+for i in chunks_za_update:
+    artikli_za_batch_update = {
+        'create': artikli_za_insert,
+        'update': i,
+        'delete': []
+    }
+
+    def BatchPostToWc():
+            wcapi.post("products/batch", artikli_za_batch_update).json()
+
+    BatchPostToWc()
+    print(wcapi.post("products/batch", artikli_za_batch_update).json())
+    print(len(i))
+
+print("--- %s seconds ---" % (time.time() - start_time))
