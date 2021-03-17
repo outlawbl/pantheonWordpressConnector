@@ -81,8 +81,9 @@ for i in razlika:
 
     i['id'] = artikal_id
     i['manage_stock'] = 'true'
+print(len(razlika))
 
 
-# razlika = [{'sku': '00101487', 'regular_price': '40.52', 'stock_quantity': 1, 'id': 10092, 'manage_stock': 'true'}, {'sku': '00102229', 'regular_price': '58.50', 'stock_quantity': 0, 'id': 10029, 'manage_stock': 'true'}]
+# razlika = [{'sku': '00101487', 'regular_price': '40.52', 'stock_quantity': 1, 'id': 10092, 'manage_stock': 'true'}, {'sku': '00102229', 'regular_price': '58.50', 'stock_quantity': 12, 'id': 10029, 'manage_stock': 'true'}]
 
 # print(razlika)

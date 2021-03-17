@@ -51,19 +51,19 @@ chunks_za_update = list(chunks(razlika, 50))
 # Postavljanje artikala na Woocommerce                                                                          #
 #################################################################################################################
 
-# def postToWc():
-#     for artikal in artikli_za_insert:
-#         wcapi.post("products", artikal).json()
+def postToWc():
+    for artikal in artikli_za_insert:
+        wcapi.post("products", artikal).json()
 
-# postToWc()
+postToWc()
 
 #################################################################################################################
 # Batch update artikala na Woocommerce                                                                          #
 #################################################################################################################
-for i in chunks_za_update:
+for lista in chunks_za_update:
     artikli_za_batch_update = {
         'create': artikli_za_insert,
-        'update': i,
+        'update': lista,
         'delete': []
         
     }
@@ -74,5 +74,14 @@ for i in chunks_za_update:
     BatchPostToWc()
     print(wcapi.post("products/batch", artikli_za_batch_update).json())
     print(len(i))
+
+brojac = 1
+
+for i in razlika:
+    id = i['id']
+    wcapi.put(f"products/{id}", i).json()
+    print(f'artikal update: {brojac}')
+    brojac += 1
+
 
 print("--- %s seconds ---" % (time.time() - start_time))

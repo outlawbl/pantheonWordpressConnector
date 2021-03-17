@@ -9,6 +9,10 @@ wcapi = API(
     query_string_auth=True
 )
 
+#
+# Woocommerce artikli
+#
+
 page = 1
 artikli = []
 woocommerce_artikli = []
@@ -17,10 +21,18 @@ while page < 30:
     woocommerce_artikli.append(artikli)
     page+=1
 
+#
+# ID Woocommerce artikala
+#
+
 id_woocommerce_artikala = []
 for artikli in woocommerce_artikli:
     for artikal in artikli:
         id_woocommerce_artikala.append(artikal['sku'])
+
+#
+# Sredjeni Woocommerce artikli
+#
 
 kljucevi = ['id', 'status', 'name', 'sku', 'regular_price', 'description', 'short_description', 'stock_quantity', 'manage_stock']
 wc_artikli_za_poredjenje = []
