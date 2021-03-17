@@ -36,52 +36,32 @@ for ident in id_za_insert:
         if artikal['sku'] == ident:
             artikli_za_insert.append(artikal)
 
-print(artikli_za_insert)
-print('Insertovano je: ', len(artikli_za_insert), ' artikala.')
+print('Artikli koji su za insert su:', artikli_za_insert)
 
 #################################################################################################################
-# Artikli koje treba update-ovati                                                                               #
+# Update artikala na Woocommerce                                                                                #
 #################################################################################################################
-def chunks(lista, n):
-    for i in range(0, len(lista), n):
-        yield lista[i:i + n]
-chunks_za_update = list(chunks(razlika, 50))
+
+brojac = 0
+
+for i in razlika:
+    if 'id' in i:
+        id = i['id']
+        sifra_artikla = i['sku']
+        wcapi.put(f"products/{id}", i).json()
+        print(f'Update artikal br. {brojac}, id: {id}, sifra: {sifra_artikla}')
+        brojac += 1
+
+print('Update-ovano je:', brojac,'artikala')
 
 #################################################################################################################
-# Postavljanje artikala na Woocommerce                                                                          #
+# Dodavanje artikala na Woocommerce                                                                             #
 #################################################################################################################
 
 def postToWc():
     for artikal in artikli_za_insert:
         wcapi.post("products", artikal).json()
-
+        print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
 postToWc()
-
-#################################################################################################################
-# Batch update artikala na Woocommerce                                                                          #
-#################################################################################################################
-for lista in chunks_za_update:
-    artikli_za_batch_update = {
-        'create': artikli_za_insert,
-        'update': lista,
-        'delete': []
-        
-    }
-
-    def BatchPostToWc():
-            wcapi.post("products/batch", artikli_za_batch_update).json()
-
-    BatchPostToWc()
-    print(wcapi.post("products/batch", artikli_za_batch_update).json())
-    print(len(i))
-
-brojac = 1
-
-for i in razlika:
-    id = i['id']
-    wcapi.put(f"products/{id}", i).json()
-    print(f'artikal update: {brojac}')
-    brojac += 1
-
 
 print("--- %s seconds ---" % (time.time() - start_time))

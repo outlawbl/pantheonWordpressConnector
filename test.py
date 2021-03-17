@@ -24,7 +24,7 @@ for artikal in wc_artikli_za_poredjenje_sa_pantheonom:
     newdict = {k: artikal[k] for k in kljucevi}
     novi_wc_artikli_za_poredjenje.append(newdict)
 
-print(len(novi_wc_artikli_za_poredjenje))
+print('Woocommerce ima:', len(novi_wc_artikli_za_poredjenje), 'artikala.')
 
 original_stdout = sys.stdout
 
@@ -54,7 +54,7 @@ for artikal in pt_artikli_za_poredjenje_sa_woocommercom:
     newdict = {k: artikal[k] for k in kljucevi}
     novi_pt_artikli_za_poredjenje.append(newdict)
 
-print(len(novi_pt_artikli_za_poredjenje))
+print('Pantheon ima: ', len(novi_pt_artikli_za_poredjenje), 'artikala.')
 
 with open('ptArtikliTxt.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
@@ -62,14 +62,8 @@ with open('ptArtikliTxt.txt', 'w') as f:
     sys.stdout = original_stdout # Reset the standard output to its original value
 
 #
+# Razlika artikala
 #
-#
-
-# set_list1 = set(tuple(sorted(d.items())) for d in sorted(novi_wc_artikli_za_poredjenje))
-# set_list2 = set(tuple(sorted(d.items())) for d in sorted(novi_pt_artikli_za_poredjenje))
-
-# set_difference = set_list1.symmetric_difference(set_list2)
-# print(set_difference)
 
 razlika = [i for i in novi_pt_artikli_za_poredjenje if i not in novi_wc_artikli_za_poredjenje]
 for i in razlika:
@@ -77,11 +71,11 @@ for i in razlika:
     for x in woocommerce_artikli:
         for y in x:
             if y['sku'] == sku:
-                artikal_id = y['id']
-
-    i['id'] = artikal_id
+                i['id'] = y['id']
+                       
     i['manage_stock'] = 'true'
-print(len(razlika))
+print('Broj artikala koji se razlikuju je: ',len(razlika))
+print(razlika)
 
 
 # razlika = [{'sku': '00101487', 'regular_price': '40.52', 'stock_quantity': 1, 'id': 10092, 'manage_stock': 'true'}, {'sku': '00102229', 'regular_price': '58.50', 'stock_quantity': 12, 'id': 10029, 'manage_stock': 'true'}]
