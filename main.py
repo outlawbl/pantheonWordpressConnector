@@ -5,11 +5,10 @@ import pyodbc as pyodbc
 import schedule
 import time
 from woocommerce import API
-from decimal import *
 import json
 from pantheonArtikli import pantheon_artikli, id_pantheon_artikala
 from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
-from test import razlika
+from poredjenjeArtikala import razlika
 
 start_time = time.time()
 
@@ -28,7 +27,7 @@ wcapi = API(
 
 id_za_insert = list(set(id_pantheon_artikala) - set(id_woocommerce_artikala))
 print(id_za_insert)
-print(len(id_za_insert))
+print('Broj artikala za insert:', len(id_za_insert))
 
 artikli_za_insert = []
 for ident in id_za_insert:
@@ -36,13 +35,13 @@ for ident in id_za_insert:
         if artikal['sku'] == ident:
             artikli_za_insert.append(artikal)
 
-print('Artikli koji su za insert su:', artikli_za_insert)
+# print('Artikli koji su za insert su:', artikli_za_insert)
 
 #################################################################################################################
 # Update artikala na Woocommerce                                                                                #
 #################################################################################################################
 
-brojac = 0
+brojac = 1
 
 for i in razlika:
     if 'id' in i:
@@ -52,7 +51,7 @@ for i in razlika:
         print(f'Update artikal br. {brojac}, id: {id}, sifra: {sifra_artikla}')
         brojac += 1
 
-print('Update-ovano je:', brojac,'artikala')
+print('Update-ovano je:', brojac-1,'artikala')
 
 #################################################################################################################
 # Dodavanje artikala na Woocommerce                                                                             #

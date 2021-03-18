@@ -26,15 +26,10 @@ db = pyodbc.connect(driver=driver, server=server, database=database, user=userna
 cur = db.cursor()
 
 #################################################################################################################
-# SQL - select artikala iz Pantheona                                                                            #
+# SQL - select artikala iz Pantheona - DIREKTNO                                                                 #
 #################################################################################################################
 
-# select_test_artikal = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'shop'"
-# select_nesinhronizovano = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'false'"
-# update_sinhronizovano = "UPDATE ao_wms_artikal SET sinhronizovano = 'true' where sinhronizovano = 'shop'"
-
-select_pantheon_artikli = "SELECT * FROM _ARTKLI_CIJENA_WS2016 where acFieldSF = 'da'" 
-
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and  Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -42,22 +37,30 @@ def query_db(query, args=(), one=False):
             for i, value in enumerate(row)) for row in cur.fetchall()]
     return (r[0] if r else None) if one else r
 
+cur.execute(select_direktno)
+pantheon_artikli = query_db(select_direktno)
 
-# nesinhronizovani_artikli = query_db(select_nesinhronizovano)
-# nesinhronizovani_artikli_json = json.dumps(nesinhronizovani_artikli)
-#
-# cur.execute(update_sinhronizovano)
-#
-# db.commit()
-#
-# print(nesinhronizovani_artikli_json)
-# print(cur.rowcount, "record(s) affected")
+# pprint.pprint(pantheon_artikli)
 
-# cur.execute(select_test_artikal)
-# test_artikli = query_db(select_test_artikal)
+#################################################################################################################
+# SQL - select artikala iz Pantheona                                                                            #
+#################################################################################################################
 
-cur.execute(select_pantheon_artikli)
-pantheon_artikli = query_db(select_pantheon_artikli)
+# select_test_artikal = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'shop'"
+# select_nesinhronizovano = "SELECT * FROM ao_wms_artikal where sinhronizovano = 'false'"
+# update_sinhronizovano = "UPDATE ao_wms_artikal SET sinhronizovano = 'true' where sinhronizovano = 'shop'"
+
+# select_pantheon_artikli = "SELECT * FROM _ARTKLI_CIJENA_WS2016 where acFieldSF = 'da'" 
+
+
+# def query_db(query, args=(), one=False):
+#     cur.execute(query, args)
+#     r = [dict((cur.description[i][0], value) \
+#             for i, value in enumerate(row)) for row in cur.fetchall()]
+#     return (r[0] if r else None) if one else r
+
+# cur.execute(select_pantheon_artikli)
+# pantheon_artikli = query_db(select_pantheon_artikli)
 
 # pprint.pprint(pantheon_artikli)
 

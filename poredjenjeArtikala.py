@@ -3,9 +3,9 @@ from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
 from jsondiff import diff
 import sys
 
-#
+##################################################################################################################
 # Woocommerce artikli za poredjenje
-#
+##################################################################################################################
 
 wca = []
 for id in id_pantheon_artikala:
@@ -33,9 +33,9 @@ with open('wcArtikliTxt.txt', 'w') as f:
     print(novi_wc_artikli_za_poredjenje)
     sys.stdout = original_stdout # Reset the standard output to its original value
 
-#
+##################################################################################################################
 # Pantheon artikli za poredjenje
-#
+##################################################################################################################
 
 pta = []
 for id in id_pantheon_artikala:
@@ -61,9 +61,9 @@ with open('ptArtikliTxt.txt', 'w') as f:
     print(novi_pt_artikli_za_poredjenje)
     sys.stdout = original_stdout # Reset the standard output to its original value
 
-#
+##################################################################################################################
 # Razlika artikala
-#
+##################################################################################################################
 
 razlika = [i for i in novi_pt_artikli_za_poredjenje if i not in novi_wc_artikli_za_poredjenje]
 for i in razlika:
@@ -75,9 +75,7 @@ for i in razlika:
                        
     i['manage_stock'] = 'true'
 print('Broj artikala koji se razlikuju je: ',len(razlika))
-print(razlika)
+# print(razlika)
 
 
 # razlika = [{'sku': '00101487', 'regular_price': '40.52', 'stock_quantity': 1, 'id': 10092, 'manage_stock': 'true'}, {'sku': '00102229', 'regular_price': '58.50', 'stock_quantity': 12, 'id': 10029, 'manage_stock': 'true'}]
-
-# print(razlika)
