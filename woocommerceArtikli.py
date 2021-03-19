@@ -34,7 +34,7 @@ for artikli in woocommerce_artikli:
 # Sredjeni Woocommerce artikli
 #
 
-kljucevi = ['id', 'status', 'name', 'sku', 'regular_price', 'description', 'short_description', 'stock_quantity', 'manage_stock']
+kljucevi = ['id', 'status', 'name', 'sku', 'regular_price', 'description', 'short_description', 'stock_quantity', 'manage_stock', 'images']
 wc_artikli_za_poredjenje = []
 
 for artikal in woocommerce_artikli:

@@ -7,6 +7,8 @@ import time
 from woocommerce import API
 from decimal import *
 import json
+from datetime import datetime
+
 
 #################################################################################################################
 # SQL DATABASE CONNECT                                                                                          #
@@ -95,6 +97,24 @@ for artikal in pantheon_artikli:
     artikal['stock_quantity'] = int(artikal['anStock'])
     # pracenje stanja
     artikal['manage_stock'] = 'true'
+    # slike
+    slike_artikala = []
+    for i in os.listdir('D:\Documents\Alf-om\Alf-om webshop\product_images'):
+        slike_artikala.append(i)
+
+    artikal['images'] = []
+
+    if artikal['sku'] in slike_artikala:
+        artikal_images = []
+        folder = artikal['sku']
+        for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
+            artikal_single_image = {}
+            kljuc = 'src'
+            putanja_slike = f'https://shop.aporia.app/wp-content/uploads/product_images/{folder}/{slika}'
+            artikal_single_image[kljuc] = putanja_slike
+            artikal_images.append(artikal_single_image)
+        artikal['images'] = artikal_images
+    
     # brisanje starih naziva
     del artikal['acIdent']
     del artikal['acName']

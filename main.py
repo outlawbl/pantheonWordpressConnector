@@ -18,7 +18,8 @@ wcapi = API(
     consumer_secret="cs_d0a6868e24896fdc20ab4dad590f20d0bb26b51e",
     version="wc/v3",
     wp_api=True,
-    query_string_auth=True
+    query_string_auth=True,
+    timeout=30
 )
 
 # ################################################################################################################
