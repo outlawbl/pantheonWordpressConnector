@@ -13,16 +13,6 @@ from connections import wcapi
 
 start_time = time.time()
 
-# wcapi = API(
-#     url="https://shop.aporia.app",
-#     consumer_key="ck_b60aa7be8132d949e8c32dc0f9a80187b4a5f155",
-#     consumer_secret="cs_d0a6868e24896fdc20ab4dad590f20d0bb26b51e",
-#     version="wc/v3",
-#     wp_api=True,
-#     query_string_auth=True,
-#     timeout=30
-# )
-
 # ################################################################################################################
 # artikli koji imaju u pantheonu a nemaju na shopu, znaci treba ih dodati
 # ################################################################################################################
