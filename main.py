@@ -5,11 +5,10 @@ import pyodbc as pyodbc
 import schedule
 import time
 from woocommerce import API
-from decimal import *
 import json
 from pantheonArtikli import pantheon_artikli, id_pantheon_artikala
 from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
-from test import razlika
+from poredjenjeArtikala import razlika
 
 start_time = time.time()
 
@@ -19,7 +18,8 @@ wcapi = API(
     consumer_secret="cs_d0a6868e24896fdc20ab4dad590f20d0bb26b51e",
     version="wc/v3",
     wp_api=True,
-    query_string_auth=True
+    query_string_auth=True,
+    timeout=30
 )
 
 # ################################################################################################################
@@ -28,7 +28,7 @@ wcapi = API(
 
 id_za_insert = list(set(id_pantheon_artikala) - set(id_woocommerce_artikala))
 print(id_za_insert)
-print(len(id_za_insert))
+print('Broj artikala za insert:', len(id_za_insert))
 
 artikli_za_insert = []
 for ident in id_za_insert:
@@ -36,42 +36,33 @@ for ident in id_za_insert:
         if artikal['sku'] == ident:
             artikli_za_insert.append(artikal)
 
-print(artikli_za_insert)
-print('Insertovano je: ', len(artikli_za_insert), ' artikala.')
+# print('Artikli koji su za insert su:', artikli_za_insert)
 
 #################################################################################################################
-# Artikli koje treba update-ovati                                                                               #
+# Update artikala na Woocommerce                                                                                #
 #################################################################################################################
-def chunks(lista, n):
-    for i in range(0, len(lista), n):
-        yield lista[i:i + n]
-chunks_za_update = list(chunks(razlika, 50))
+def updateWcArtikli():
+    brojac = 1
+    for i in razlika:
+        if 'id' in i:
+            id = i['id']
+            sifra_artikla = i['sku']
+            wcapi.put(f"products/{id}", i).json()
+            print(f'Update artikal br. {brojac}, id: {id}, sifra: {sifra_artikla}')
+            brojac += 1
 
-#################################################################################################################
-# Postavljanje artikala na Woocommerce                                                                          #
-#################################################################################################################
-
-# def postToWc():
-#     for artikal in artikli_za_insert:
-#         wcapi.post("products", artikal).json()
-
-# postToWc()
+    print('Update-ovano je:', brojac-1,'artikala')
 
 #################################################################################################################
-# Batch update artikala na Woocommerce                                                                          #
+# Dodavanje artikala na Woocommerce                                                                             #
 #################################################################################################################
-for i in chunks_za_update:
-    artikli_za_batch_update = {
-        'create': artikli_za_insert,
-        'update': i,
-        'delete': []
-    }
 
-    def BatchPostToWc():
-            wcapi.post("products/batch", artikli_za_batch_update).json()
-
-    BatchPostToWc()
-    print(wcapi.post("products/batch", artikli_za_batch_update).json())
-    print(len(i))
+def postToWc():
+    for artikal in artikli_za_insert:
+        wcapi.post("products", artikal).json()
+        print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
+        
+postToWc()
+updateWcArtikli()
 
 print("--- %s seconds ---" % (time.time() - start_time))
