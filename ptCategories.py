@@ -1,8 +1,9 @@
 from connections import db
 from connections import wcapi
+import pprint
 cur = db.cursor()
 
-select_kategorije = "select C.acName as acClassif2Name from  tHE_SetItemCateg C"
+select_kategorije = "select C.acName as naziv, c.acClassIf as id from  tHE_SetItemCateg C"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -13,12 +14,15 @@ def query_db(query, args=(), one=False):
 cur.execute(select_kategorije)
 pantheon_kategorije = query_db(select_kategorije)
 
-# insert category
+pprint.pprint(pantheon_kategorije)
 
+# insert categories
 def insert_categories():
     for item in pantheon_kategorije:
         kategorija = {}
         kategorija['name'] = item['acClassif2Name']
         wcapi.post("products/categories", kategorija).json()
         print(wcapi.post("products/categories", kategorija).json())
+
+
 

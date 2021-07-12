@@ -6,11 +6,12 @@ import pyodbc as pyodbc
 
 wcapi = API(
     url="https://shop.aporia.app",
-    consumer_key="ck_b60aa7be8132d949e8c32dc0f9a80187b4a5f155",
-    consumer_secret="cs_d0a6868e24896fdc20ab4dad590f20d0bb26b51e",
+    consumer_key="ck_eec2ff7cf774af9eca6c49abc613b8a3ab16636b",
+    consumer_secret="cs_5c646cc3f344d0896bb035a6e62fcff7bef2b96d",
     version="wc/v3",
     wp_api=True,
-    query_string_auth=True
+    query_string_auth=True,
+    timeout=600
 )
 
 wcapi2 = API(
@@ -20,7 +21,7 @@ wcapi2 = API(
     version="wc/v2",
     wp_api=True,
     query_string_auth=True,
-    timeout=120
+    timeout=600
 )
 
 data_file = 'config.ini'

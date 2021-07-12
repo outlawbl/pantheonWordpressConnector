@@ -7,13 +7,14 @@ import json
 from datetime import datetime
 from connections import db
 from wcCategories import woocommerce_kategorije
-from aoWebShopArtikli import aoWebShopArtikli_za_poredjenje
+from decimal import Decimal
+# from aoWebShopArtikli import aoWebShopArtikli_za_poredjenje
 
 
 #################################################################################################################
-# SQL DATABASE CONNECT                                                                                          #
+# Popust                                                                                          #
 #################################################################################################################
-
+popust = 0.05
 
 
 #################################################################################################################
@@ -69,6 +70,9 @@ for artikal in pantheon_artikli:
     artikal['name'] = artikal['acName']
     # cijena
     artikal['regular_price'] = str(round(artikal['anSalePrice'], 2))
+
+    cijena_sa_popustom = artikal['anSalePrice'] * Decimal(1-popust)
+    artikal['sale_price'] = str(round(cijena_sa_popustom, 2))
     # opis
     artikal['description'] = str(artikal['acTechProcedure']).splitlines()
     opis = ''
@@ -87,6 +91,15 @@ for artikal in pantheon_artikli:
     artikal['stock_quantity'] = int(artikal['anStock'])
     # pracenje stanja
     artikal['manage_stock'] = 'true'
+    if artikal['stock_quantity'] > 0:
+        artikal['stock_status'] = 'instock'
+        artikal['backorders'] = 'no'
+    else:
+        artikal['backorders'] = 'notify'
+        artikal['backordered'] = 'true'
+        artikal['backorders_allowed'] = 'true'
+        artikal['stock_status'] = 'onbackorder'
+
     # slike
 
     # sa servera
@@ -108,15 +121,15 @@ for artikal in pantheon_artikli:
     #     artikal['images'] = artikal_images
 
     # sa starog shopa
-    artikal['images'] = []
-    for aoWebShopArtikal in aoWebShopArtikli_za_poredjenje:
-        if artikal['sku'] == aoWebShopArtikal['sku']:
-            slika = {}
-            brojac = 0
-            for image in aoWebShopArtikal['images']:
-                slika['src'] = aoWebShopArtikal['images'][brojac]['src']
-                artikal['images'].append(slika)
-                brojac+=1
+    # artikal['images'] = []
+    # for aoWebShopArtikal in aoWebShopArtikli_za_poredjenje:
+    #     if artikal['sku'] == aoWebShopArtikal['sku']:
+    #         slika = {}
+    #         brojac = 0
+    #         for image in aoWebShopArtikal['images']:
+    #             slika['src'] = aoWebShopArtikal['images'][brojac]['src']
+    #             artikal['images'].append(slika)
+    #             brojac+=1
 
     # kategorije NEDOVRSENO
     artikal['categories'] = []
@@ -150,5 +163,5 @@ id_pantheon_artikala = []
 for artikal in pantheon_artikli:
     id_pantheon_artikala.append(artikal['sku'])
 
-pprint.pprint(pantheon_artikli)
+# pprint.pprint(pantheon_artikli)
 print('Pantheon artikala ima: ', len(id_pantheon_artikala))

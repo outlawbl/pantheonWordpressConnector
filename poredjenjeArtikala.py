@@ -3,36 +3,7 @@ from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
 from jsondiff import diff
 import sys
 
-##################################################################################################################
-# Woocommerce artikli za poredjenje
-##################################################################################################################
-
-wca = []
-for id in id_pantheon_artikala:
-    x = list(filter(lambda x: x['sku'] == id, wc_artikli_za_poredjenje))
-    wca.append(x)
-print(len(id_pantheon_artikala), 'id_pantheon_artikala')
-
-wc_artikli_za_poredjenje_sa_pantheonom = []
-for lista in wca:
-    for item in lista:
-        wc_artikli_za_poredjenje_sa_pantheonom.append(item)
-
-kljucevi = ['sku', 'regular_price', 'stock_quantity', 'name']
-novi_wc_artikli_za_poredjenje = []
-
-for artikal in wc_artikli_za_poredjenje_sa_pantheonom:
-    newdict = {k: artikal[k] for k in kljucevi}
-    novi_wc_artikli_za_poredjenje.append(newdict)
-
-print('Woocommerce ima:', len(novi_wc_artikli_za_poredjenje), 'artikala.')
-
-original_stdout = sys.stdout
-
-with open('wcArtikliTxt.txt', 'w') as f:
-    sys.stdout = f # Change the standard output to the file we created.
-    print(novi_wc_artikli_za_poredjenje)
-    sys.stdout = original_stdout # Reset the standard output to its original value
+kljucevi_za_poredjenje = ['sku', 'regular_price', 'stock_quantity', 'stock_status', 'backorders', 'sale_price']
 
 ##################################################################################################################
 # Pantheon artikli za poredjenje
@@ -45,16 +16,18 @@ for id in id_pantheon_artikala:
 
 pt_artikli_za_poredjenje_sa_woocommercom = []
 for sublist in pta:
-    for item in sublist:
-        pt_artikli_za_poredjenje_sa_woocommercom.append(item)
+    for xzy in sublist:
+        pt_artikli_za_poredjenje_sa_woocommercom.append(xzy)
 
 novi_pt_artikli_za_poredjenje = []
 
-for artikal in pt_artikli_za_poredjenje_sa_woocommercom:
-    newdict = {k: artikal[k] for k in kljucevi}
-    novi_pt_artikli_za_poredjenje.append(newdict)
+for pt_artikal in pt_artikli_za_poredjenje_sa_woocommercom:
+    pt_dict = {kljuc: pt_artikal[kljuc] for kljuc in kljucevi_za_poredjenje}
+    novi_pt_artikli_za_poredjenje.append(pt_dict)
 
 print('Pantheon ima', len(novi_pt_artikli_za_poredjenje), 'artikala.')
+
+original_stdout = sys.stdout
 
 with open('ptArtikliTxt.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
@@ -62,18 +35,57 @@ with open('ptArtikliTxt.txt', 'w') as f:
     sys.stdout = original_stdout # Reset the standard output to its original value
 
 ##################################################################################################################
+# Woocommerce artikli za poredjenje
+##################################################################################################################
+
+wca = []
+for pt_id in id_pantheon_artikala:
+    x = list(filter(lambda x: x['sku'] == pt_id, wc_artikli_za_poredjenje))
+    wca.append(x)
+# print(len(id_pantheon_artikala), 'id_pantheon_artikala')
+
+wc_artikli_za_poredjenje_sa_pantheonom = []
+for lista in wca:
+    for item in lista:
+        item['name'] = str(item['name']).replace('&amp;','&')
+        wc_artikli_za_poredjenje_sa_pantheonom.append(item)
+
+novi_wc_artikli_za_poredjenje = []
+
+for wc_artikal in wc_artikli_za_poredjenje_sa_pantheonom:
+    wc_dict = {wc_k: wc_artikal[wc_k] for wc_k in kljucevi_za_poredjenje}
+    novi_wc_artikli_za_poredjenje.append(wc_dict)
+
+print('Woocommerce za poredjenje ima:', len(novi_wc_artikli_za_poredjenje), 'artikala.')
+
+
+
+with open('wcArtikliTxt.txt', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print(f'wcArtikli = {novi_wc_artikli_za_poredjenje}')
+    sys.stdout = original_stdout # Reset the standard output to its original value
+
+##################################################################################################################
 # Razlika artikala
 ##################################################################################################################
 
 razlika = [i for i in novi_pt_artikli_za_poredjenje if i not in novi_wc_artikli_za_poredjenje]
-for i in razlika:
-    sku = i['sku']
+for artikal in razlika:
+    sku = artikal['sku']
     for x in woocommerce_artikli:
         for y in x:
             if y['sku'] == sku:
-                i['id'] = y['id']
+                artikal['id'] = y['id']
                        
-    i['manage_stock'] = 'true'
+    artikal['manage_stock'] = 'true'
+    for item in novi_pt_artikli_za_poredjenje:
+        if item['sku'] == sku:
+            print('Novi Pantheon Artikal',item)
+
+    # artikal['manage_stock'] = 'true'
+    for item in novi_wc_artikli_za_poredjenje:
+        if item['sku'] == sku:
+            print('Stari Woocommerce Artikal',item)       
 print('Broj artikala koji se razlikuju je: ',len(razlika))
 # print(razlika)
 

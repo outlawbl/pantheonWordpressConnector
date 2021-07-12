@@ -1,4 +1,5 @@
 from connections import wcapi
+from ptCategories import pantheon_kategorije
 import pprint
 
 ukupno_stranica_kategorija = wcapi.get("products/categories?per_page=100").headers['X-WP-TotalPages']
@@ -21,7 +22,7 @@ for kat in woocommerce_kategorije:
         pprint.pprint(kat['name'])
 
 
-# delete categories
+# delete categories with no products
 
 def delete_categories():
     for kat in woocommerce_kategorije:
@@ -29,5 +30,19 @@ def delete_categories():
             print(wcapi.delete(f"products/categories/{kat['id']}", params={"force": True}).json())
             wcapi.delete(f"products/categories/{kat['id']}", params={"force": True}).json()
 
-delete_categories()
+# delete_categories()
+
+# update categories - insert Pantheon ID in description
+def update_categories():
+    for wc_kat in woocommerce_kategorije:
+        for pt_cat in pantheon_kategorije:
+            if wc_kat['name'] == pt_cat['naziv']:
+                print('Update kategorije:', {wc_kat['name']})
+                slug = wc_kat['slug']
+                cat_id = pt_cat['id']
+                data = [{"description":cat_id}]
+                print(wcapi.put(f"products/categories?slug={slug}", data).json())
+
+update_categories()
+       
 
