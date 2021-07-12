@@ -1,37 +1,27 @@
 import os
 import pprint
-from configparser import ConfigParser
-import pyodbc as pyodbc
 import schedule
 import time
 from woocommerce import API
-from decimal import *
 import json
 from datetime import datetime
+from connections import db
+from wcCategories import woocommerce_kategorije
+from aoWebShopArtikli import aoWebShopArtikli_za_poredjenje
 
 
 #################################################################################################################
 # SQL DATABASE CONNECT                                                                                          #
 #################################################################################################################
 
-data_file = 'config.ini'
-config = ConfigParser()
-config.read(data_file)
 
-driver = config['db_config']['driver']
-server = config['db_config']['server']
-database = config['db_config']['database']
-username = config['db_config']['username']
-password = config['db_config']['password']
-
-db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password)
-cur = db.cursor()
 
 #################################################################################################################
 # SQL - select artikala iz Pantheona - DIREKTNO                                                                 #
 #################################################################################################################
+cur = db.cursor()
 
-select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and  Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -98,23 +88,44 @@ for artikal in pantheon_artikli:
     # pracenje stanja
     artikal['manage_stock'] = 'true'
     # slike
-    slike_artikala = []
-    for i in os.listdir('D:\Documents\Alf-om\Alf-om webshop\product_images'):
-        slike_artikala.append(i)
 
+    # sa servera
+    # slike_artikala = []
+    # for i in os.listdir('D:\Documents\Alf-om\Alf-om webshop\product_images'):
+    #     slike_artikala.append(i)
+
+    # artikal['images'] = []
+
+    # if artikal['sku'] in slike_artikala:
+    #     artikal_images = []
+    #     folder = artikal['sku']
+    #     for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
+    #         artikal_single_image = {}
+    #         kljuc = 'src'
+    #         putanja_slike = f'https://shop.aporia.app/wp-content/uploads/product_images/{folder}/{slika}'
+    #         artikal_single_image[kljuc] = putanja_slike
+    #         artikal_images.append(artikal_single_image)
+    #     artikal['images'] = artikal_images
+
+    # sa starog shopa
     artikal['images'] = []
+    for aoWebShopArtikal in aoWebShopArtikli_za_poredjenje:
+        if artikal['sku'] == aoWebShopArtikal['sku']:
+            slika = {}
+            brojac = 0
+            for image in aoWebShopArtikal['images']:
+                slika['src'] = aoWebShopArtikal['images'][brojac]['src']
+                artikal['images'].append(slika)
+                brojac+=1
 
-    if artikal['sku'] in slike_artikala:
-        artikal_images = []
-        folder = artikal['sku']
-        for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
-            artikal_single_image = {}
-            kljuc = 'src'
-            putanja_slike = f'https://shop.aporia.app/wp-content/uploads/product_images/{folder}/{slika}'
-            artikal_single_image[kljuc] = putanja_slike
-            artikal_images.append(artikal_single_image)
-        artikal['images'] = artikal_images
-    
+    # kategorije NEDOVRSENO
+    artikal['categories'] = []
+    for kat in woocommerce_kategorije:
+        if artikal['acClassif2Name'] == kat['name']:
+            kategorija = {}
+            kategorija['id'] = kat['id']
+            artikal['categories'].append(kategorija)
+
     # brisanje starih naziva
     del artikal['acIdent']
     del artikal['acName']
@@ -139,5 +150,5 @@ id_pantheon_artikala = []
 for artikal in pantheon_artikli:
     id_pantheon_artikala.append(artikal['sku'])
 
-# print(pantheon_artikli)
-# print('Pantheon artikala ima: ', len(id_pantheon_artikala))
+pprint.pprint(pantheon_artikli)
+print('Pantheon artikala ima: ', len(id_pantheon_artikala))

@@ -41,18 +41,17 @@ for ident in id_za_insert:
 #################################################################################################################
 # Update artikala na Woocommerce                                                                                #
 #################################################################################################################
+def updateWcArtikli():
+    brojac = 1
+    for i in razlika:
+        if 'id' in i:
+            id = i['id']
+            sifra_artikla = i['sku']
+            wcapi.put(f"products/{id}", i).json()
+            print(f'Update artikal br. {brojac}, id: {id}, sifra: {sifra_artikla}')
+            brojac += 1
 
-brojac = 1
-
-for i in razlika:
-    if 'id' in i:
-        id = i['id']
-        sifra_artikla = i['sku']
-        wcapi.put(f"products/{id}", i).json()
-        print(f'Update artikal br. {brojac}, id: {id}, sifra: {sifra_artikla}')
-        brojac += 1
-
-print('Update-ovano je:', brojac-1,'artikala')
+    print('Update-ovano je:', brojac-1,'artikala')
 
 #################################################################################################################
 # Dodavanje artikala na Woocommerce                                                                             #
@@ -62,6 +61,8 @@ def postToWc():
     for artikal in artikli_za_insert:
         wcapi.post("products", artikal).json()
         print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
+        
 postToWc()
+updateWcArtikli()
 
 print("--- %s seconds ---" % (time.time() - start_time))

@@ -11,13 +11,14 @@ wca = []
 for id in id_pantheon_artikala:
     x = list(filter(lambda x: x['sku'] == id, wc_artikli_za_poredjenje))
     wca.append(x)
+print(len(id_pantheon_artikala), 'id_pantheon_artikala')
 
 wc_artikli_za_poredjenje_sa_pantheonom = []
-for sublist in wca:
-    for item in sublist:
+for lista in wca:
+    for item in lista:
         wc_artikli_za_poredjenje_sa_pantheonom.append(item)
 
-kljucevi = ['sku', 'regular_price', 'stock_quantity']
+kljucevi = ['sku', 'regular_price', 'stock_quantity', 'name']
 novi_wc_artikli_za_poredjenje = []
 
 for artikal in wc_artikli_za_poredjenje_sa_pantheonom:
@@ -47,14 +48,13 @@ for sublist in pta:
     for item in sublist:
         pt_artikli_za_poredjenje_sa_woocommercom.append(item)
 
-kljucevi = ['sku','regular_price', 'stock_quantity']
 novi_pt_artikli_za_poredjenje = []
 
 for artikal in pt_artikli_za_poredjenje_sa_woocommercom:
     newdict = {k: artikal[k] for k in kljucevi}
     novi_pt_artikli_za_poredjenje.append(newdict)
 
-print('Pantheon ima: ', len(novi_pt_artikli_za_poredjenje), 'artikala.')
+print('Pantheon ima', len(novi_pt_artikli_za_poredjenje), 'artikala.')
 
 with open('ptArtikliTxt.txt', 'w') as f:
     sys.stdout = f # Change the standard output to the file we created.
