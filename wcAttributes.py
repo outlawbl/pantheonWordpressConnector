@@ -1,5 +1,6 @@
 from connections import wcapi
 import pprint
+import sys
 
 ukupno_stranica_atributa = wcapi.get("products/attributes?per_page=100").headers['X-WP-TotalPages']
 
@@ -58,6 +59,13 @@ def brisanje_atributa_koji_se_ne_koriste():
 
 # for x in wc_atributi_lista:
     # print(x['name'], x['id'])
-pprint.pprint(wc_atributi_lista)
-print('atributa ima',len(wc_atributi_lista))
+# pprint.pprint(wc_atributi_lista)
+print('Atributa ima',len(wc_atributi_lista))
+
+original_stdout = sys.stdout
+
+with open('wcAtributiTxt.py', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print(f'wc_atributi = {wc_atributi_lista}')
+    sys.stdout = original_stdout # Reset the standard output to its original value
 

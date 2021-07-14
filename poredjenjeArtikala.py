@@ -27,12 +27,12 @@ for pt_artikal in pt_artikli_za_poredjenje_sa_woocommercom:
 
 print('Pantheon ima', len(novi_pt_artikli_za_poredjenje), 'artikala.')
 
-original_stdout = sys.stdout
+# original_stdout = sys.stdout
 
-with open('ptArtikliTxt.txt', 'w') as f:
-    sys.stdout = f # Change the standard output to the file we created.
-    print(novi_pt_artikli_za_poredjenje)
-    sys.stdout = original_stdout # Reset the standard output to its original value
+# with open('ptArtikliTxt.txt', 'w') as f:
+#     sys.stdout = f # Change the standard output to the file we created.
+#     print(novi_pt_artikli_za_poredjenje)
+#     sys.stdout = original_stdout # Reset the standard output to its original value
 
 ##################################################################################################################
 # Woocommerce artikli za poredjenje
@@ -60,10 +60,10 @@ print('Woocommerce za poredjenje ima:', len(novi_wc_artikli_za_poredjenje), 'art
 
 
 
-with open('wcArtikliTxt.txt', 'w') as f:
-    sys.stdout = f # Change the standard output to the file we created.
-    print(f'wcArtikli = {novi_wc_artikli_za_poredjenje}')
-    sys.stdout = original_stdout # Reset the standard output to its original value
+# with open('wcArtikliTxt.txt', 'w') as f:
+#     sys.stdout = f # Change the standard output to the file we created.
+#     print(f'wcArtikli = {novi_wc_artikli_za_poredjenje}')
+#     sys.stdout = original_stdout # Reset the standard output to its original value
 
 ##################################################################################################################
 # Razlika artikala

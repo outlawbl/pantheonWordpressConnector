@@ -6,13 +6,17 @@ from woocommerce import API
 import json
 from datetime import datetime
 from connections import db
-from wcCategories import woocommerce_kategorije
+# from wcCategories import woocommerce_kategorije
+from sabloniAtributa import *
 from decimal import Decimal
+import sys
+import re
+
 # from aoWebShopArtikli import aoWebShopArtikli_za_poredjenje
 
 
 #################################################################################################################
-# Popust                                                                                          #
+# Popust                                                                                                        #
 #################################################################################################################
 popust = 0.05
 
@@ -22,7 +26,7 @@ popust = 0.05
 #################################################################################################################
 cur = db.cursor()
 
-select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T' and S.acClassif2 = '0142'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -33,7 +37,32 @@ def query_db(query, args=(), one=False):
 cur.execute(select_direktno)
 pantheon_artikli = query_db(select_direktno)
 
+original_stdout = sys.stdout
+
+with open('ptArtikliTxt.py', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print(f'pantheon_artikli = {pantheon_artikli}')
+    sys.stdout = original_stdout # Reset the standard output to its original value
+
 # pprint.pprint(pantheon_artikli)
+
+
+#################################################################################################################
+# SQL - Pantheon artikli kojima je stanje 0 i nisu ulazili zadnja 3 mjeseca.                                    #
+#################################################################################################################
+
+# select_stari_artikli = "select pp.acIdent, pp.acName, z.acWarehouse,z.anStock from tHE_SetItem pp left join the_Stock z on pp.acIdent=z.acIdent where pp.acActive='T' and pp.acIdent not in (select acIdent from tHE_MoveItem mi join the_Move m on mi.acKey=m.acKey WHERE m.acDocType in ( '1000','1020','1900','1910','11920')and m.adDate > '20210331') and pp.acSetOfItem='200' and (z.acWarehouse in ( 'Skladište VP1 BL', 'Skladište VP SA') and z.anStock=0) order by pp.acIdent"
+
+# # def query_db(query, args=(), one=False):
+# #     cur.execute(query, args)
+# #     r = [dict((cur.description[i][0], value) \
+# #             for i, value in enumerate(row)) for row in cur.fetchall()]
+# #     return (r[0] if r else None) if one else r
+
+# cur.execute(select_stari_artikli)
+# pantheon_stari_artikli = query_db(select_stari_artikli)
+
+# pprint.pprint(pantheon_stari_artikli)
 
 #################################################################################################################
 # SQL - select artikala iz Pantheona                                                                            #
@@ -62,6 +91,9 @@ pantheon_artikli = query_db(select_direktno)
 #################################################################################################################
 
 for artikal in pantheon_artikli:
+    # sekundarna klasifikacija
+    artikal['sec_class'] = artikal['acClassif2']
+    sec_class = 'sec_class_' + artikal['sec_class']
     # status
     artikal['status'] = 'draft'
     # pantheon sifra
@@ -75,6 +107,7 @@ for artikal in pantheon_artikli:
     artikal['sale_price'] = str(round(cijena_sa_popustom, 2))
     # opis
     artikal['description'] = str(artikal['acTechProcedure']).splitlines()
+
     opis = ''
     for red in artikal['description']:
         opis += red
@@ -99,6 +132,29 @@ for artikal in pantheon_artikli:
         artikal['backordered'] = 'true'
         artikal['backorders_allowed'] = 'true'
         artikal['stock_status'] = 'onbackorder'
+    # atributi
+    artikal['attributes'] = dodavanje_atributa(eval(sec_class))
+
+    atributi_iz_opisa = []
+    for red in artikal['acTechProcedure'].splitlines():
+        atribut = {}
+        kljuc_atributa = re.findall(r'.+?(?=:)', red)
+        vrijednost_atributa = re.findall(r'(?<=:).*', red)
+        if len(kljuc_atributa) > 0:
+            atribut['name'] = kljuc_atributa[0].strip()
+            options = []
+            options.append(vrijednost_atributa[0].strip())
+            atribut['options'] = options
+            atributi_iz_opisa.append(atribut)
+    for attr in artikal['attributes']:
+        for attr2 in atributi_iz_opisa:
+            if attr['name'] == attr2['name']:
+                attr['options'] = attr2['options']   
+    
+        
+
+    pprint.pprint(atributi_iz_opisa)
+    
 
     # slike
 
@@ -131,15 +187,15 @@ for artikal in pantheon_artikli:
     #             artikal['images'].append(slika)
     #             brojac+=1
 
-    # kategorije NEDOVRSENO
-    artikal['categories'] = []
-    for kat in woocommerce_kategorije:
-        if artikal['acClassif2Name'] == kat['name']:
-            kategorija = {}
-            kategorija['id'] = kat['id']
-            artikal['categories'].append(kategorija)
+    # # kategorije NEDOVRSENO
+    # artikal['categories'] = []
+    # for kat in woocommerce_kategorije:
+    #     if artikal['acClassif2Name'] == kat['name']:
+    #         kategorija = {}
+    #         kategorija['id'] = kat['id']
+    #         artikal['categories'].append(kategorija)
 
-    # brisanje starih naziva
+    # brisanje starih kljuceva
     del artikal['acIdent']
     del artikal['acName']
     del artikal['anSalePrice']
@@ -164,4 +220,4 @@ for artikal in pantheon_artikli:
     id_pantheon_artikala.append(artikal['sku'])
 
 # pprint.pprint(pantheon_artikli)
-print('Pantheon artikala ima: ', len(id_pantheon_artikala))
+# print('Pantheon artikala ima: ', len(id_pantheon_artikala))

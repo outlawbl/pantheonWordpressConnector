@@ -19,7 +19,7 @@ for grupa_kat in woocommerce_kat:
 
 for kat in woocommerce_kategorije:
     if kat['count'] == 0:
-        pprint.pprint(kat['name'])
+        print('Kategorija nema proizvoda', kat['name'])
 
 
 # delete categories with no products
@@ -43,6 +43,6 @@ def update_categories():
                 data = [{"description":cat_id}]
                 print(wcapi.put(f"products/categories?slug={slug}", data).json())
 
-update_categories()
+# update_categories()
        
 
