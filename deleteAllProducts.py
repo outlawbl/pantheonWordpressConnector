@@ -13,5 +13,5 @@ def delete_all_products():
             obrisani_artikli += 1
             pb.print_progress_bar(obrisani_artikli)
 
-delete_all_products()
+# delete_all_products()
 

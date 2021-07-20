@@ -6,10 +6,11 @@ import schedule
 import time
 from woocommerce import API
 import json
-from pantheonArtikli import pantheon_artikli, id_pantheon_artikala
+from pantheonArtikli import pantheon_artikli, id_pantheon_artikala, pantheon_stari_artikli
 from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
 from poredjenjeArtikala import razlika
 from connections import wcapi
+from wcArtikliTxt import wcArtikli
 
 start_time = time.time()
 
@@ -55,5 +56,25 @@ def postToWc():
         
 postToWc()
 updateWcArtikli()
+
+#################################################################################################################
+# Dodavanje artikala na Woocommerce                                                                             #
+#################################################################################################################
+
+def sakrivanjeArtikalaStarijihOd6Mjeseci():
+    data = {
+        'status' : 'draft'
+    }
+    for artikal in pantheon_stari_artikli:
+        sku = artikal['acIdent']
+        for grupa in wcArtikli:
+            for a in grupa:
+                if a['sku'] == sku and a['status'] == 'publish': 
+                    id = a['id']
+                    print(wcapi.put(f"products/{id}", data).json())
+
+
+
+# sakrivanjeArtikalaStarijihOd6Mjeseci()
 
 print("--- %s seconds ---" % (time.time() - start_time))

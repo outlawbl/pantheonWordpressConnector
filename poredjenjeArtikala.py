@@ -59,8 +59,9 @@ for wc_artikal in wc_artikli_za_poredjenje_sa_pantheonom:
 print('Woocommerce za poredjenje ima:', len(novi_wc_artikli_za_poredjenje), 'artikala.')
 
 
+# original_stdout = sys.stdout
 
-# with open('wcArtikliTxt.txt', 'w') as f:
+# with open('wcArtikliTxt.py', 'w') as f:
 #     sys.stdout = f # Change the standard output to the file we created.
 #     print(f'wcArtikli = {novi_wc_artikli_za_poredjenje}')
 #     sys.stdout = original_stdout # Reset the standard output to its original value

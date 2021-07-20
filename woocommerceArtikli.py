@@ -1,5 +1,6 @@
 from connections import wcapi
 import pprint
+import sys
 
 #
 # Woocommerce artikli
@@ -54,3 +55,10 @@ for artikal in wc_artikli_za_poredjenje:
 # for artikal in wc_artikli_za_poredjenje:
 #     if artikal['sku'] == '01422985':
 #         print(artikal)
+
+original_stdout = sys.stdout
+
+with open('wcArtikliTxt.py', 'w') as f:
+    sys.stdout = f # Change the standard output to the file we created.
+    print(f'wcArtikli = {woocommerce_artikli}')
+    sys.stdout = original_stdout # Reset the standard output to its original value

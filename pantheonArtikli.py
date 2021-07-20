@@ -18,15 +18,16 @@ import re
 #################################################################################################################
 # Popust                                                                                                        #
 #################################################################################################################
-popust = 0.05
 
+popust = 0.05
 
 #################################################################################################################
 # SQL - select artikala iz Pantheona - DIREKTNO                                                                 #
 #################################################################################################################
 cur = db.cursor()
 
-select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T' and S.acClassif2 = '0142'"
+# select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -48,21 +49,33 @@ with open('ptArtikliTxt.py', 'w') as f:
 
 
 #################################################################################################################
-# SQL - Pantheon artikli kojima je stanje 0 i nisu ulazili zadnja 3 mjeseca.                                    #
+# SQL - Pantheon artikli kojima je stanje 0 i nisu ulazili zadnjih 6 mjeseci.                                    #
 #################################################################################################################
 
-# select_stari_artikli = "select pp.acIdent, pp.acName, z.acWarehouse,z.anStock from tHE_SetItem pp left join the_Stock z on pp.acIdent=z.acIdent where pp.acActive='T' and pp.acIdent not in (select acIdent from tHE_MoveItem mi join the_Move m on mi.acKey=m.acKey WHERE m.acDocType in ( '1000','1020','1900','1910','11920')and m.adDate > '20210331') and pp.acSetOfItem='200' and (z.acWarehouse in ( 'Skladište VP1 BL', 'Skladište VP SA') and z.anStock=0) order by pp.acIdent"
+select_stari_artikli = "select pp.acIdent, SUM(anStock) from tHE_SetItem pp left join the_Stock z on pp.acIdent=z.acIdent where pp.acActive='T' and pp.acIdent not in (select acIdent from tHE_MoveItem mi join the_Move m on mi.acKey=m.acKey WHERE m.acDocType in ( '1000','1020','1900','1910','11920')and m.adDate > '20210101') and pp.acSetOfItem='200' and (z.acWarehouse in ( 'Skladište VP1 BL', 'Skladište VP SA') and z.anStock=0) group by pp.acIdent order by pp.acIdent"
 
-# # def query_db(query, args=(), one=False):
-# #     cur.execute(query, args)
-# #     r = [dict((cur.description[i][0], value) \
-# #             for i, value in enumerate(row)) for row in cur.fetchall()]
-# #     return (r[0] if r else None) if one else r
+# def query_db(query, args=(), one=False):
+#     cur.execute(query, args)
+#     r = [dict((cur.description[i][0], value) \
+#             for i, value in enumerate(row)) for row in cur.fetchall()]
+#     return (r[0] if r else None) if one else r
 
-# cur.execute(select_stari_artikli)
-# pantheon_stari_artikli = query_db(select_stari_artikli)
+cur.execute(select_stari_artikli)
+pantheon_stari_artikli = query_db(select_stari_artikli)
 
 # pprint.pprint(pantheon_stari_artikli)
+pprint.pprint(len(pantheon_stari_artikli))
+
+#################################################################################################################
+# SQL - Neaktivni Pantheon artikli.                                                                             #
+#################################################################################################################
+
+select_neaktivni_artikli = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and S.acActive = 'F'"
+
+cur.execute(select_neaktivni_artikli)
+pantheon_neaktivni_artikli = query_db(select_neaktivni_artikli)
+
+pprint.pprint(len(pantheon_neaktivni_artikli))
 
 #################################################################################################################
 # SQL - select artikala iz Pantheona                                                                            #
@@ -133,27 +146,28 @@ for artikal in pantheon_artikli:
         artikal['backorders_allowed'] = 'true'
         artikal['stock_status'] = 'onbackorder'
     # atributi
-    artikal['attributes'] = dodavanje_atributa(eval(sec_class))
+    if sec_class in svi_sabloni and artikal['acTechProcedure'] is not None:
+        artikal['attributes'] = dodavanje_atributa(eval(sec_class))
 
-    atributi_iz_opisa = []
-    for red in artikal['acTechProcedure'].splitlines():
-        atribut = {}
-        kljuc_atributa = re.findall(r'.+?(?=:)', red)
-        vrijednost_atributa = re.findall(r'(?<=:).*', red)
-        if len(kljuc_atributa) > 0:
-            atribut['name'] = kljuc_atributa[0].strip()
-            options = []
-            options.append(vrijednost_atributa[0].strip())
-            atribut['options'] = options
-            atributi_iz_opisa.append(atribut)
-    for attr in artikal['attributes']:
-        for attr2 in atributi_iz_opisa:
-            if attr['name'] == attr2['name']:
-                attr['options'] = attr2['options']   
+        atributi_iz_opisa = []
+        for red in artikal['acTechProcedure'].splitlines():
+            atribut = {}
+            kljuc_atributa = re.findall(r'.+?(?=:)', red)
+            vrijednost_atributa = re.findall(r'(?<=:).*', red)
+            if len(kljuc_atributa) > 0:
+                atribut['name'] = kljuc_atributa[0].strip()
+                options = []
+                options.append(vrijednost_atributa[0].strip())
+                atribut['options'] = options
+                atributi_iz_opisa.append(atribut)
+        for attr in artikal['attributes']:
+            for attr2 in atributi_iz_opisa:
+                if attr['name'] == attr2['name']:
+                    attr['options'] = attr2['options']   
     
         
 
-    pprint.pprint(atributi_iz_opisa)
+        # pprint.pprint(atributi_iz_opisa)
     
 
     # slike

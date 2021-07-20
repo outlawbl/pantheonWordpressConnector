@@ -1,5 +1,5 @@
 from connections import wcapi
-from ptCategories import pantheon_kategorije
+# from ptCategories import pantheon_kategorije
 import pprint
 
 ukupno_stranica_kategorija = wcapi.get("products/categories?per_page=100").headers['X-WP-TotalPages']
@@ -18,8 +18,11 @@ for grupa_kat in woocommerce_kat:
         woocommerce_kategorije.append(kategorija)
 
 for kat in woocommerce_kategorije:
-    if kat['count'] == 0:
-        print('Kategorija nema proizvoda', kat['name'])
+    count = kat['count']
+    if count == 0:
+        print(kat['name'], 'ID:', kat['id'], f'({count})')
+    else:
+        print(kat['name'], 'ID:', kat['id'], f'({count})')
 
 
 # delete categories with no products
