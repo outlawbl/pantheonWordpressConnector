@@ -9,13 +9,6 @@ while page <= 20:
     aoWebShopArtikli.append(artikli)
     page+=1
 
-original_stdout = sys.stdout
-
-# with open('wcArtikliTxt.txt', 'w') as f:
-#     sys.stdout = f # Change the standard output to the file we created.
-#     print(aoWebShopArtikli)
-#     sys.stdout = original_stdout # Reset the standard output to its original value
-
 #
 # ID Woocommerce artikala
 #

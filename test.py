@@ -20,21 +20,26 @@ from connections import db
 
 # pprint.pprint(atributi_iz_opisa)
 
-def update_postavi_na_web_sajt():
-    cur = db.cursor()
+# def update_polja_postavi_na_web_sajt():
+#     cur = db.cursor()
 
-    out_of_stock = []
-    for artikli in wcArtikli:
-        for artikal in artikli:
-            if artikal['stock_status'] == 'outofstock' :
-                out_of_stock.append(artikal['sku'])
-    # print(out_of_stock)
-    # print(len(out_of_stock))
+#     out_of_stock = []
+#     for artikli in wcArtikli:
+#         for artikal in artikli:
+#             if artikal['stock_status'] == 'outofstock' :
+#                 out_of_stock.append(artikal['sku'])
+#     # print(out_of_stock)
+#     # print(len(out_of_stock))
 
-    for x in out_of_stock:
-        upit = f"update tHE_SetItem set acFieldSF = 'DA' where acIdent = '{x}'"
-        cur.execute(upit)
-        db.commit()
-        print('Promjenjen je', x)
+#     for x in out_of_stock:
+#         upit = f"update tHE_SetItem set acFieldSF = 'DA' where acIdent = '{x}'"
+#         cur.execute(upit)
+#         db.commit()
+#         print('Promjenjen je', x)
 
-# update_postavi_na_web_sajt()
+# # update_postavi_na_web_sajt()
+
+string = 'Proizćčđš\nlkasjdflkasj\nlaskdjflksj'
+
+for red in string.splitlines():
+    print(red)

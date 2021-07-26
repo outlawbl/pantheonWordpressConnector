@@ -39,8 +39,9 @@ def updateWcArtikli():
         if 'id' in i:
             id = i['id']
             sifra_artikla = i['sku']
-            print(wcapi.put(f"products/{id}", i).json())
-            print(f'{brojac}. Update artikal id: {id}, sifra: {sifra_artikla}')
+            naziv_artikla = i['name']
+            wcapi.put(f"products/{id}", i).json()
+            print(f'{brojac}. Update: {naziv_artikla}, id: {id}, sifra: {sifra_artikla}')
             brojac += 1
 
     print('Update-ovano je:', brojac-1,'artikala')
@@ -52,7 +53,8 @@ def updateWcArtikli():
 def postToWc():
     for artikal in artikli_za_insert:
         if artikal['sku'] not in pantheon_stari_artikli_ids:
-            print(wcapi.post("products", artikal).json())
+            artikal['status'] = 'pending'
+            wcapi.post("products", artikal).json()
             print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
         
 postToWc()

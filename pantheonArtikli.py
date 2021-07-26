@@ -26,8 +26,8 @@ popust = 0.05
 #################################################################################################################
 cur = db.cursor()
 
-select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
-# select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA'"
+# select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -75,7 +75,7 @@ for artikal in pantheon_stari_artikli:
 # SQL - Neaktivni Pantheon artikli.                                                                             #
 #################################################################################################################
 
-select_neaktivni_artikli = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and S.acActive = 'F'"
+select_neaktivni_artikli = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, S.acTechProcedure As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and S.acActive = 'F'"
 
 cur.execute(select_neaktivni_artikli)
 pantheon_neaktivni_artikli = query_db(select_neaktivni_artikli)
@@ -109,130 +109,131 @@ pprint.pprint(len(pantheon_neaktivni_artikli))
 #################################################################################################################
 
 for artikal in pantheon_artikli:
-    # sekundarna klasifikacija
-    artikal['sec_class'] = artikal['acClassif2']
-    sec_class = 'sec_class_' + artikal['sec_class']
-    # status
-    artikal['status'] = 'draft'
-    # pantheon sifra
-    artikal['sku'] = str(artikal['acIdent']).strip()
-    # naziv artikla
-    artikal['name'] = artikal['acName']
-    # cijena
-    artikal['regular_price'] = str(round(artikal['anSalePrice'], 2))
+    if artikal['acIdent'] == '01230495':
+        # sekundarna klasifikacija
+        artikal['sec_class'] = artikal['acClassif2']
+        sec_class = 'sec_class_' + artikal['sec_class']
+        # status
+        artikal['status'] = 'draft'
+        # pantheon sifra
+        artikal['sku'] = str(artikal['acIdent']).strip()
+        # naziv artikla
+        artikal['name'] = artikal['acName']
+        # cijena
+        artikal['regular_price'] = str(round(artikal['anSalePrice'], 2))
 
-    cijena_sa_popustom = artikal['anSalePrice'] * Decimal(1-popust)
-    artikal['sale_price'] = str(round(cijena_sa_popustom, 2))
-    # opis
-    artikal['description'] = str(artikal['acTechProcedure']).splitlines()
+        cijena_sa_popustom = artikal['anSalePrice'] * Decimal(1-popust)
+        artikal['sale_price'] = str(round(cijena_sa_popustom, 2))
+        # opis
+        artikal['description'] = str(artikal['acTechProcedure']).splitlines()
 
-    opis = ''
-    for red in artikal['description']:
-        opis += red
-        opis += ' '
-    artikal['description'] = opis
-    # kratiki opis
-    artikal['short_description'] =  str(artikal['acDescr']).splitlines()
-    kratki_opis = ''
-    for red in artikal['short_description']:
-        kratki_opis += ' '
-        kratki_opis += red
-    artikal['short_description'] = kratki_opis
-    # kolicina na stanju
-    artikal['stock_quantity'] = int(artikal['anStock'])
-    # pracenje stanja
-    artikal['manage_stock'] = 'true'
-    if artikal['stock_quantity'] > 0:
-        artikal['stock_status'] = 'instock'
-        artikal['backorders'] = 'no'
-    else:
-        artikal['backorders'] = 'notify'
-        artikal['backordered'] = 'true'
-        artikal['backorders_allowed'] = 'true'
-        artikal['stock_status'] = 'onbackorder'
-    # atributi
-    if sec_class in svi_sabloni and artikal['acTechProcedure'] is not None:
-        artikal['attributes'] = dodavanje_atributa(eval(sec_class))
+        opis = ''
+        for red in artikal['description']:
+            opis += red
+            opis += ' '
+        artikal['description'] = opis
+        # kratiki opis
+        artikal['short_description'] =  str(artikal['acDescr']).splitlines()
+        kratki_opis = ''
+        for red in artikal['short_description']:
+            kratki_opis += ' '
+            kratki_opis += red
+        artikal['short_description'] = kratki_opis
+        # kolicina na stanju
+        artikal['stock_quantity'] = int(artikal['anStock'])
+        # pracenje stanja
+        artikal['manage_stock'] = 'true'
+        if artikal['stock_quantity'] > 0:
+            artikal['stock_status'] = 'instock'
+            artikal['backorders'] = 'no'
+        else:
+            artikal['backorders'] = 'notify'
+            artikal['backordered'] = 'true'
+            artikal['backorders_allowed'] = 'true'
+            artikal['stock_status'] = 'onbackorder'
+        # atributi
+        if sec_class in svi_sabloni and artikal['acTechProcedure'] is not None:
+            artikal['attributes'] = dodavanje_atributa(eval(sec_class))
 
-        atributi_iz_opisa = []
-        for red in artikal['acTechProcedure'].splitlines():
-            atribut = {}
-            kljuc_atributa = re.findall(r'.+?(?=:)', red)
-            vrijednost_atributa = re.findall(r'(?<=:).*', red)
-            if len(kljuc_atributa) > 0:
-                atribut['name'] = kljuc_atributa[0].strip()
-                options = []
-                options.append(vrijednost_atributa[0].strip())
-                atribut['options'] = options
-                atributi_iz_opisa.append(atribut)
-        for attr in artikal['attributes']:
-            for attr2 in atributi_iz_opisa:
-                if attr['name'] == attr2['name']:
-                    attr['options'] = attr2['options']   
-    
+            atributi_iz_opisa = []
+            for red in artikal['acTechProcedure'].splitlines():
+                atribut = {}
+                kljuc_atributa = re.findall(r'.+?(?=:)', red)
+                vrijednost_atributa = re.findall(r'(?<=:).*', red)
+                if len(kljuc_atributa) > 0:
+                    atribut['name'] = kljuc_atributa[0].strip()
+                    options = []
+                    options.append(vrijednost_atributa[0].strip())
+                    atribut['options'] = options
+                    atributi_iz_opisa.append(atribut)
+            for attr in artikal['attributes']:
+                for attr2 in atributi_iz_opisa:
+                    if attr['name'] == attr2['name']:
+                        attr['options'] = attr2['options']   
+        
+            
+
+            # pprint.pprint(atributi_iz_opisa)
         
 
-        # pprint.pprint(atributi_iz_opisa)
-    
+        # slike
 
-    # slike
+        # sa servera
+        # slike_artikala = []
+        # for i in os.listdir('D:\Documents\Alf-om\Alf-om webshop\product_images'):
+        #     slike_artikala.append(i)
 
-    # sa servera
-    # slike_artikala = []
-    # for i in os.listdir('D:\Documents\Alf-om\Alf-om webshop\product_images'):
-    #     slike_artikala.append(i)
+        # artikal['images'] = []
 
-    # artikal['images'] = []
+        # if artikal['sku'] in slike_artikala:
+        #     artikal_images = []
+        #     folder = artikal['sku']
+        #     for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
+        #         artikal_single_image = {}
+        #         kljuc = 'src'
+        #         putanja_slike = f'https://shop.aporia.app/wp-content/uploads/product_images/{folder}/{slika}'
+        #         artikal_single_image[kljuc] = putanja_slike
+        #         artikal_images.append(artikal_single_image)
+        #     artikal['images'] = artikal_images
 
-    # if artikal['sku'] in slike_artikala:
-    #     artikal_images = []
-    #     folder = artikal['sku']
-    #     for slika in os.listdir(f'D:\Documents\Alf-om\Alf-om webshop\product_images\{folder}'):
-    #         artikal_single_image = {}
-    #         kljuc = 'src'
-    #         putanja_slike = f'https://shop.aporia.app/wp-content/uploads/product_images/{folder}/{slika}'
-    #         artikal_single_image[kljuc] = putanja_slike
-    #         artikal_images.append(artikal_single_image)
-    #     artikal['images'] = artikal_images
+        # sa starog shopa
+        # artikal['images'] = []
+        # for aoWebShopArtikal in aoWebShopArtikli_za_poredjenje:
+        #     if artikal['sku'] == aoWebShopArtikal['sku']:
+        #         slika = {}
+        #         brojac = 0
+        #         for image in aoWebShopArtikal['images']:
+        #             slika['src'] = aoWebShopArtikal['images'][brojac]['src']
+        #             artikal['images'].append(slika)
+        #             brojac+=1
 
-    # sa starog shopa
-    # artikal['images'] = []
-    # for aoWebShopArtikal in aoWebShopArtikli_za_poredjenje:
-    #     if artikal['sku'] == aoWebShopArtikal['sku']:
-    #         slika = {}
-    #         brojac = 0
-    #         for image in aoWebShopArtikal['images']:
-    #             slika['src'] = aoWebShopArtikal['images'][brojac]['src']
-    #             artikal['images'].append(slika)
-    #             brojac+=1
+        # # kategorije NEDOVRSENO
+        # artikal['categories'] = []
+        # for kat in woocommerce_kategorije:
+        #     if artikal['acClassif2Name'] == kat['name']:
+        #         kategorija = {}
+        #         kategorija['id'] = kat['id']
+        #         artikal['categories'].append(kategorija)
 
-    # # kategorije NEDOVRSENO
-    # artikal['categories'] = []
-    # for kat in woocommerce_kategorije:
-    #     if artikal['acClassif2Name'] == kat['name']:
-    #         kategorija = {}
-    #         kategorija['id'] = kat['id']
-    #         artikal['categories'].append(kategorija)
-
-    # brisanje starih kljuceva
-    del artikal['acIdent']
-    del artikal['acName']
-    del artikal['anSalePrice']
-    del artikal['acTechProcedure']
-    del artikal['acDescr']
-    del artikal['anStock']
-    del artikal['acFieldSG']
-    del artikal['acFieldSF']
-    del artikal['acClassif']
-    del artikal['anSubClassif']
-    del artikal['acClassif2']
-    del artikal['acClassif2Name']
-    del artikal['acCode']
-    del artikal['anRTPrice']
-    del artikal['acFieldSA']
-    del artikal['acFieldSE']
-    del artikal['adTimeChg']
-    del artikal['adTimeIns']
+        # brisanje starih kljuceva
+        del artikal['acIdent']
+        del artikal['acName']
+        del artikal['anSalePrice']
+        del artikal['acTechProcedure']
+        del artikal['acDescr']
+        del artikal['anStock']
+        del artikal['acFieldSG']
+        del artikal['acFieldSF']
+        del artikal['acClassif']
+        del artikal['anSubClassif']
+        del artikal['acClassif2']
+        del artikal['acClassif2Name']
+        del artikal['acCode']
+        del artikal['anRTPrice']
+        del artikal['acFieldSA']
+        del artikal['acFieldSE']
+        del artikal['adTimeChg']
+        del artikal['adTimeIns']
 
 id_pantheon_artikala = []
 for artikal in pantheon_artikli:

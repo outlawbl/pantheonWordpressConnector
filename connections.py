@@ -34,4 +34,4 @@ database = config['db_config']['database']
 username = config['db_config']['username']
 password = config['db_config']['password']
 
-db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password)
+db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password, charset='UTF-8')

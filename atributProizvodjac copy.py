@@ -1,7 +1,7 @@
 from connections import wcapi
 # from woocommerceArtikli import woocommerce_artikli
 from aoWebShopArtikli import aoWebShopArtikli
-from wcAtributiTxt import stari_shop_atributi
+from wcAtributiTxt import wc_atributi
 from wcAtributiTermsTxt import stari_shop_atributi_terms
 import pprint
 
@@ -12,7 +12,7 @@ def novi_shop_atributi():
 
 novi_shop_atributi()
 
-print('Stari shop ima:', len(stari_shop_atributi), 'atributa')
+print('Stari shop ima:', len(wc_atributi), 'atributa')
 
 print('Stari shop ima:', len(stari_shop_atributi_terms), 'termsa')
 
@@ -26,7 +26,7 @@ def svi_nazivi_atributa():
     global svi_nazivi_atributa_lst
     svi_nazivi_atributa_lst = []
     
-    for atribut in stari_shop_atributi:
+    for atribut in wc_atributi:
         if atribut['name'] not in svi_nazivi_atributa_lst:
             svi_nazivi_atributa_lst.append(atribut['name'])
     

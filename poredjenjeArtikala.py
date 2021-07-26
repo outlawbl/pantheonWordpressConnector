@@ -1,4 +1,4 @@
-from pantheonArtikli import pantheon_artikli, id_pantheon_artikala
+from pantheonArtikli import pantheon_artikli, id_pantheon_artikala, pantheon_stari_artikli_ids
 from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala, woocommerce_artikli
 from jsondiff import diff
 import sys
@@ -22,8 +22,9 @@ for sublist in pta:
 novi_pt_artikli_za_poredjenje = []
 
 for pt_artikal in pt_artikli_za_poredjenje_sa_woocommercom:
-    pt_dict = {kljuc: pt_artikal[kljuc] for kljuc in kljucevi_za_poredjenje}
-    novi_pt_artikli_za_poredjenje.append(pt_dict)
+    if pt_artikal['sku'] not in pantheon_stari_artikli_ids:
+        pt_dict = {kljuc: pt_artikal[kljuc] for kljuc in kljucevi_za_poredjenje}
+        novi_pt_artikli_za_poredjenje.append(pt_dict)
 
 print('Pantheon ima', len(novi_pt_artikli_za_poredjenje), 'artikala.')
 
