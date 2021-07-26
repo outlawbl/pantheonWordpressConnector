@@ -6,7 +6,7 @@ import schedule
 import time
 from woocommerce import API
 import json
-from pantheonArtikli import pantheon_artikli, id_pantheon_artikala, pantheon_stari_artikli
+from pantheonArtikli import pantheon_artikli, id_pantheon_artikala, pantheon_stari_artikli, pantheon_stari_artikli_ids
 from woocommerceArtikli import wc_artikli_za_poredjenje, id_woocommerce_artikala
 from poredjenjeArtikala import razlika
 from connections import wcapi
@@ -51,8 +51,9 @@ def updateWcArtikli():
 
 def postToWc():
     for artikal in artikli_za_insert:
-        print(wcapi.post("products", artikal).json())
-        print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
+        if artikal['sku'] not in pantheon_stari_artikli_ids:
+            print(wcapi.post("products", artikal).json())
+            print('Insertovan je:', artikal['name'], ', sifra:', artikal['sku'])
         
 postToWc()
 updateWcArtikli()

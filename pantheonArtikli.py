@@ -26,8 +26,8 @@ popust = 0.05
 #################################################################################################################
 cur = db.cursor()
 
-# select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
-select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA'"
+select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA' and S.acActive = 'T'"
+# select_direktno = "select S.acIdent, S.acName, S.acFieldSF, S.acFieldSG, S.acClassif, S.anSubClassif, S.acClassif2, C.acName as acClassif2Name, S.acCode, S.anRTPrice, S.anSalePrice, S.acFieldSA, S.acFieldSE, LTrim(RTrim(S.acTechProcedure)) As acTechProcedure, LTrim(RTrim(S.acDescr)) As acDescr, K.anStock , CONVERT(VARCHAR(24),K.adTimeChg,121) as adTimeChg, CONVERT(VARCHAR(24),K.adTimeIns,121) as adTimeIns from tHE_SetItem S join tHE_Stock K on S.acIdent=K.acIdent join tHE_SetItemCateg C on C.acClassif = S.acClassif2 where K.acWarehouse='Skladište VP1 BL' and Upper(LTrim(RTrim(S.acFieldSF))) = 'DA'"
 
 def query_db(query, args=(), one=False):
     cur.execute(query, args)
@@ -52,7 +52,7 @@ with open('ptArtikliTxt.py', 'w') as f:
 # SQL - Pantheon artikli kojima je stanje 0 i nisu ulazili zadnjih 6 mjeseci.                                    #
 #################################################################################################################
 
-select_stari_artikli = "select pp.acIdent, SUM(anStock) from tHE_SetItem pp left join the_Stock z on pp.acIdent=z.acIdent where pp.acActive='T' and pp.acIdent not in (select acIdent from tHE_MoveItem mi join the_Move m on mi.acKey=m.acKey WHERE m.acDocType in ( '1000','1020','1900','1910','11920')and m.adDate > '20210101') and pp.acSetOfItem='200' and (z.acWarehouse in ( 'Skladište VP1 BL', 'Skladište VP SA') and z.anStock=0) group by pp.acIdent order by pp.acIdent"
+select_stari_artikli = "select pp.acIdent, SUM(anStock) as kolicina from tHE_SetItem pp left join the_Stock z on pp.acIdent=z.acIdent where pp.acIdent not in (select acIdent from tHE_MoveItem mi join the_Move m on mi.acKey=m.acKey WHERE m.acDocType in ( '1000','1020','1900','1910','11920','3000','3200')and m.adDate > '20210101') and pp.acSetOfItem='200' group by pp.acIdent having SUM(anStock) = 0 order by pp.acIdent"
 
 # def query_db(query, args=(), one=False):
 #     cur.execute(query, args)
@@ -65,6 +65,11 @@ pantheon_stari_artikli = query_db(select_stari_artikli)
 
 # pprint.pprint(pantheon_stari_artikli)
 pprint.pprint(len(pantheon_stari_artikli))
+
+pantheon_stari_artikli_ids = []
+for artikal in pantheon_stari_artikli:
+    pantheon_stari_artikli_ids.append(artikal['acIdent'])
+
 
 #################################################################################################################
 # SQL - Neaktivni Pantheon artikli.                                                                             #
@@ -231,7 +236,8 @@ for artikal in pantheon_artikli:
 
 id_pantheon_artikala = []
 for artikal in pantheon_artikli:
-    id_pantheon_artikala.append(artikal['sku'])
+    if artikal['sku'] not in pantheon_stari_artikli_ids:
+      id_pantheon_artikala.append(artikal['sku'])
 
 # pprint.pprint(pantheon_artikli)
 # print('Pantheon artikala ima: ', len(id_pantheon_artikala))
