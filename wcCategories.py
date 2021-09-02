@@ -17,12 +17,12 @@ for grupa_kat in woocommerce_kat:
     for kategorija in grupa_kat:
         woocommerce_kategorije.append(kategorija)
 
-for kat in woocommerce_kategorije:
-    count = kat['count']
-    if count == 0:
-        print(kat['name'], 'ID:', kat['id'], f'({count})')
-    else:
-        print(kat['name'], 'ID:', kat['id'], f'({count})')
+# for kat in woocommerce_kategorije:
+#     count = kat['count']
+#     if count == 0:
+#         print(kat['name'], 'ID:', kat['id'], f'({count})')
+#     else:
+#         print(kat['name'], 'ID:', kat['id'], f'({count})')
 
 
 # delete categories with no products

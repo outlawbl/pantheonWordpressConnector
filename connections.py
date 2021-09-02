@@ -4,7 +4,7 @@ import pyodbc as pyodbc
 
 
 
-wcapi = API(
+wcapi3 = API(
     url="https://shop.aporia.app",
     consumer_key="ck_eec2ff7cf774af9eca6c49abc613b8a3ab16636b",
     consumer_secret="cs_5c646cc3f344d0896bb035a6e62fcff7bef2b96d",
@@ -24,14 +24,27 @@ wcapi2 = API(
     timeout=600
 )
 
+wcapi = API(
+    url="https://shop.alf-om.com",
+    consumer_key="ck_2597957ea8001d46498ffdf9b2c5fad0590eb7cc",
+    consumer_secret="cs_35935ead375a25e2d59fad98baf73ca65c41cd78",
+    version="wc/v2",
+    wp_api=True,
+    query_string_auth=True,
+    timeout=600
+)
+
 data_file = 'config.ini'
 config = ConfigParser()
 config.read(data_file)
 
-driver = config['db_config']['driver']
-server = config['db_config']['server']
-database = config['db_config']['database']
-username = config['db_config']['username']
-password = config['db_config']['password']
+pantheon_driver = config['db_config']['pantheon_driver']
+pantheon_server = config['db_config']['pantheon_server']
+pantheon_database = config['db_config']['pantheon_database']
+pantheon_username = config['db_config']['pantheon_username']
+pantheon_password = config['db_config']['pantheon_password']
 
-db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password, charset='UTF-8')
+db = pyodbc.connect(driver=pantheon_driver, server=pantheon_server, database=pantheon_database, user=pantheon_username, password=pantheon_password, charset='UTF-8')
+
+
+# db = pyodbc.connect(driver=driver, server=server, database=database, user=username, password=password, charset='UTF-8')

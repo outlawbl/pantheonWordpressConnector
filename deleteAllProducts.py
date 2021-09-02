@@ -2,7 +2,7 @@ from connections import wcapi
 from woocommerceArtikli import woocommerce_artikli, id_woocommerce_artikala
 import time
 # from progressBar import progressBar
-from console_progressbar import ProgressBar
+# from console_progressbar import ProgressBar
 
 def delete_all_products():
     for artikal in woocommerce_artikli:
@@ -15,3 +15,10 @@ def delete_all_products():
 
 # delete_all_products()
 
+def delete_all_laptops():
+    for artikal in woocommerce_artikli:
+        for x in artikal:
+            if x['categories'][0]['slug'] == 'racunari_polovni':
+                print(wcapi.delete(f"products/{x['id']}", params={"force": True}).json())
+
+delete_all_laptops()

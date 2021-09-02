@@ -20,6 +20,11 @@ from connections import wcapi
 
 # brisanje_neaktivnih_artikala()
 
+
+#
+# Bice obrisani artikli sa koji su zaiha 0 i sa kojima se nije radilo od 1.1.2020.
+#
+
 def brisanje_starih_artikala():
     wcartikli = []
 
@@ -39,5 +44,32 @@ def brisanje_starih_artikala():
                     print('Nije uspjelo')
                 
 
+# brisanje_starih_artikala()
+
+def brisanje_starih_artikala():
+    wcartikli = []
+
+    for grupa in wcArtikli:
+        for artikal in grupa:
+            wcartikli.append(artikal)
+
+    for pt_artikal in pantheon_stari_artikli:
+        for wc_artikal in wcartikli:
+            if pt_artikal['acIdent'] == wc_artikal['sku']:
+                id = wc_artikal['id']
+                data = {
+                    "tags":[
+                        {"name" : "Stari artikal"}
+                    ],
+                    "status" : "draft"
+                }
+                try:
+                    print(wcapi.put(f"products/{id}", data).json())
+                    print('Obrisan je', wc_artikal['name'], wc_artikal['sku'])
+                except:
+                    print('Nije uspjelo')
+                
+
 brisanje_starih_artikala()
+
 
